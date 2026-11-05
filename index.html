@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falas Homeonatural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap">
+<style>
+/* Layout: abas com nome no topo, texto grande em blocos; barra inferior de leitura; modo Foco esconde tudo menos a fala */
+:root{
+  --bg:#F6F8F3; --ink:#16210F; --mute:#5E6B55; --card:#FFFFFF; --line:#D9E2D1;
+  --green:#469A2B; --green-d:#1F5C14; --chip:#E3F0DC;
+  --call:#E6F3DF; --cta:#FFE8CC; --cta-ink:#7A3E00; --note:#FFF4D6; --guide:rgba(70,154,43,.16);
+  --display:"Poppins",system-ui,sans-serif; --body:"Roboto",system-ui,sans-serif;
+  --fs:36px;
+}
+:root[data-theme="dark"]{
+  --bg:#0B0F08; --ink:#F4F8F0; --mute:#A3B398; --card:#151C11; --line:#27331F;
+  --green:#6CC24A; --green-d:#A6E08C; --chip:#1D2A17;
+  --call:#1B2A15; --cta:#33220F; --cta-ink:#FFC98A; --note:#2B2510; --guide:rgba(108,194,74,.22); color-scheme:dark;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-theme="dark"]){
+  --bg:#0B0F08; --ink:#F4F8F0; --mute:#A3B398; --card:#151C11; --line:#27331F;
+  --green:#6CC24A; --green-d:#A6E08C; --chip:#1D2A17;
+  --call:#1B2A15; --cta:#33220F; --cta-ink:#FFC98A; --note:#2B2510; --guide:rgba(108,194,74,.22); color-scheme:dark;}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-text-size-adjust:100%}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 16px}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:0 0 auto;padding:8px 14px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;line-height:1.15}
+.tab b{display:block;font:700 18px var(--display)} .tab small{font:500 12px var(--body);color:var(--mute)}
+.tab[aria-selected="true"]{background:var(--green);border-color:var(--green)} .tab[aria-selected="true"] b,.tab[aria-selected="true"] small{color:#fff}
+.tab.done::after{content:" ✓";font-weight:700;color:var(--green)} .tab[aria-selected="true"].done::after{color:#fff}
+button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+main{max-width:860px;margin:0 auto;padding:18px 16px 150px}
+h1{font:700 clamp(22px,4vw,30px)/1.2 var(--display);margin:2px 0 4px;text-wrap:balance}
+.meta{color:var(--mute);font-size:16px;margin:0 0 6px}
+.hint{color:var(--mute);font-size:14px;margin:0 0 18px}
+.blk{border-radius:18px;padding:18px 20px;margin:0 0 16px;background:var(--card);border:1px solid var(--line)}
+.tag{display:inline-block;font:700 13px var(--display);letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--chip);color:var(--green-d);margin-bottom:12px}
+.blk.call{background:var(--call)} .blk.cta{background:var(--cta)} .blk.cta .tag{background:rgba(0,0,0,.1);color:var(--cta-ink)}
+.blk.alt{border:2px dashed var(--green)}
+.blk.note{background:var(--note);font-size:17px;line-height:1.4}
+.blk.note .tag{background:rgba(0,0,0,.08);color:var(--mute)}
+.line{font:500 var(--fs)/1.42 var(--body);margin:0 0 .6em;text-wrap:pretty}
+.line:last-child{margin-bottom:0}
+.line b{font-weight:700;color:var(--green-d)}
+.q{font:600 calc(var(--fs)*.6)/1.3 var(--display);color:var(--mute);margin:0 0 .25em}
+.q::before{content:"PERGUNTA";display:block;font:700 12px var(--display);letter-spacing:.1em;color:var(--green-d);margin-bottom:2px}
+.a{font:500 var(--fs)/1.42 var(--body);margin:0 0 1.1em;padding-left:14px;border-left:5px solid var(--green)}
+.a:last-child{margin-bottom:0}
+.dur{display:inline-block;margin-left:8px;font:500 14px var(--body);color:var(--mute)}
+.next{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+.guide{position:fixed;left:0;right:0;top:38%;height:calc(var(--fs)*1.5);background:var(--guide);border-top:2px solid var(--green);border-bottom:2px solid var(--green);pointer-events:none;display:none;z-index:4}
+body.rolling .guide{display:block}
+.count{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;font:700 160px var(--display);color:var(--green);background:color-mix(in srgb,var(--bg) 80%,transparent)}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.btn{min-height:50px;min-width:50px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:700 16px var(--display);cursor:pointer}
+.btn.go{background:var(--green);border-color:var(--green);color:#fff;min-width:130px;font-size:18px}
+.btn.on{background:var(--chip);border-color:var(--green)}
+.spd{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:13px}
+.spd output{min-width:64px;text-align:center;font:700 15px var(--display);color:var(--ink)}
+/* Modo Foco: só a fala */
+body.focus .top,body.focus .tag,body.focus .meta,body.focus .hint,body.focus .note,body.focus .next,body.focus h1{display:none}
+body.focus main{padding-top:24px}
+body.focus .bar{opacity:.35} body.focus .bar:hover,body.focus .bar:focus-within{opacity:1}
+body.focus .blk{border:none;background:transparent;padding:6px 0;margin:0 0 20px}
+body.focus .blk.call,body.focus .blk.cta{background:transparent}
+body.focus .blk.cta .line{color:var(--cta-ink)} body.focus .blk.call .line{color:var(--green-d)}
+@media (max-width:560px){:root{--fs:29px}.btn{padding:0 10px;min-width:42px;min-height:44px;font-size:15px}.bar{gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}main{padding-bottom:140px}.count{font-size:110px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="tabs" role="tablist" id="tabs"></div></header>
+<main id="view"></main>
+<div class="guide" aria-hidden="true"></div>
+<div class="count" id="count" aria-live="assertive"></div>
+<div class="bar">
+  <button class="btn" id="minus" aria-label="Diminuir letra">A−</button>
+  <button class="btn" id="plus" aria-label="Aumentar letra">A+</button>
+  <button class="btn go" id="play">▶ Rolar</button>
+  <div class="spd"><button class="btn" id="slow" aria-label="Mais devagar">−</button><output id="spdl">Médio</output><button class="btn" id="fast" aria-label="Mais rápido">+</button></div>
+  <button class="btn" id="theme" aria-label="Alternar claro e escuro">Tema</button>
+  <button class="btn" id="foc" aria-pressed="false">Foco</button>
+  <button class="btn" id="done" aria-pressed="false">✓ Gravado</button>
+</div>
+<script>
+const V=[
+{id:'c1',n:'C1',s:'Black',t:'Black Friday Homeonatural',m:'Balcão · 35 a 40 s',
+ call:['Chegou a Black Friday da Homeonatural, a maior que a gente já fez!'],
+ body:['São 4 dias: <b>26, 27, 28 e 30 de novembro</b>.','Os descontos vão de <b>10% a 30%</b>, dependendo do produto.','E tem um detalhe: cada pote é um mês de tratamento, e quanto mais tempo você leva, maior o desconto.','Com <b>2 potes</b>, o desconto é maior do que com 1.','Tem Akkermat, Morosil, Biosil, Berberina, Creatina, Relora, PeptiStrong e muito mais.','E a nossa linha de cosméticos <b>Home Care</b> também está com <b>20% de desconto</b>.','Vale nas nossas lojas de Ipanema e do Leblon, e também nos pedidos pelo WhatsApp.'],
+ cta:['Chama a gente no WhatsApp e escreve <b>"Vi a Black"</b> que a gente te manda a lista completa.','Mas corre: a Black vai só até <b>segunda, dia 30</b>.','No sábado a gente fecha às 13h, e domingo a loja não abre.','A gente espera o seu pedido!'],
+ extra:{tag:'Versão curta · 15 s',lines:['Black Friday Homeonatural: dias 26, 27, 28 e 30 de novembro.','Até 30% de desconto em produtos selecionados e 20% na linha Home Care.','Chama a gente no WhatsApp e escreve <b>"Vi a Black"</b>.']},
+ note:'Abertura alternativa (opcional, gravar à parte): "Quer tratar por dois meses? Na Black, o desconto é maior."'},
+{id:'c2',n:'C2',s:'Fórmula',t:'Quem assina a sua fórmula?',m:'Escritório ou fundo neutro · 40 s',
+ call:['Toda fórmula que sai daqui começa com um nome. Não é um código, nem um número de lote: é o nome de uma pessoa.'],
+ body:['Eu sou a Suyanne, farmacêutica e sócia da Homeonatural, aqui na Zona Sul do Rio.','Antes de qualquer outra etapa, a farmacêutica responsável analisa a sua fórmula: eu, no Leblon, e Graciete, em Ipanema.','A gente confere as doses, a posologia e se os ativos combinam entre si.','Depois, a fórmula é manipulada, passa pelo controle de qualidade e é conferida de novo antes de chegar até você.','Se a pessoa não consegue engolir uma cápsula, a gente não desiste: muda o formato.','A Homeonatural está há <b>43 anos</b> cuidando de gente, e sempre trabalhou assim: uma fórmula pensada para você.'],
+ cta:['Ficou com alguma dúvida sobre a sua fórmula?','É só chamar uma farmacêutica nossa no WhatsApp.','Homeonatural, um compromisso com a sua saúde.']},
+{id:'c3',n:'C3',s:'Bastidores',t:'O que ninguém vê',m:'Produção e bastidores · 35 a 40 s · pode ser só voz',
+ call:['Antes de pedir o seu manipulado, deixa eu te mostrar o que quase ninguém vê.'],
+ body:['Tudo começa quando a sua receita chega: pelo WhatsApp ou, se você preferir, trazendo aqui na loja.','A equipe confere os dados e uma farmacêutica analisa a fórmula: doses, posologia e se os ativos combinam entre si.','Se tiver qualquer dúvida, a gente fala com você ou com o médico antes de seguir.','Aprovado o orçamento, a fórmula vai para o laboratório, é manipulada, passa pelo controle de qualidade e é conferida de novo.','Aí é só embalar e entregar: o nosso motoboy leva na Zona Sul e nos bairros perto, muitas vezes no mesmo dia ou no dia útil seguinte.','Para o resto do Rio, o prazo e o frete a gente combina com você pelo WhatsApp.'],
+ cta:['Quer ver esse cuidado acontecendo com a sua fórmula?','É só mandar a sua receita pelo WhatsApp.']},
+{id:'c4',n:'C4',s:'Jogo rápido',t:'Jogo rápido',m:'Fundo neutro, em pé · 40 a 50 s · perguntas feitas fora do quadro',
+ qa:[['Posso mandar a minha receita pelo WhatsApp?','Pode, sim! É só tirar uma foto e mandar pra gente.'],
+     ['Vocês entregam em quais locais?','No Rio inteiro! E na Zona Sul a gente chega bem rapidinho.'],
+     ['Quanto tempo leva para ficar pronto?','Muitas vezes, no mesmo dia! Manda a sua receita no WhatsApp que a gente já te diz o prazo certinho.'],
+     ['Se eu consigo comprar pronto, por que manipular?','Porque a gente ajusta a dose e a forma para você, sempre com a sua prescrição. Tudo de forma personalizada.'],
+     ['E quem treina? Tem alguma coisa pensada para a rotina?','Tem sim! Creatina e magnésio, por exemplo, sempre com a orientação de uma farmacêutica.'],
+     ['Onde eu encontro tudo isso?','Aqui na Homeonatural! Na loja ou pelo WhatsApp.']],
+ cta:['Ficou com outra dúvida?','Manda pra gente no WhatsApp.'],
+ note:'Quem pergunta fica fora do quadro, bem perto do microfone. A Su responde olhando para a câmera, com respostas curtas e sorriso. Se errar, repete só aquela resposta.'},
+{id:'c5',n:'C5',s:'43 anos',t:'43 anos de história',m:'Fachada de Ipanema · 30 a 40 s',
+ call:['Foi em Ipanema que tudo começou, há <b>43 anos</b>.'],
+ body:['A Homeonatural nasceu em 1983, pelas mãos do Irineu Pasquott e da Graciete.','A Graciete, aliás, é até hoje um dos rostos mais queridos do bairro de Ipanema.','De lá pra cá, vieram uma equipe inteira de farmacêuticas e milhares de fórmulas preparadas, uma por uma.','A gente cresceu, mas o jeito de cuidar continua o mesmo de sempre.'],
+ cta:['Quer fazer parte dessa história também?','Chama a gente no WhatsApp.','Homeonatural, um compromisso com a sua saúde.']},
+{id:'c6',n:'C6',s:'Produtos',t:'Akkermat e Morosil',m:'Balcão, produto na mão · 30 a 40 s',
+ call:['Dois dos produtos que mais saem aqui na Homeonatural.'],
+ body:['O primeiro é o <b>Akkermat</b>. Ele promove saciedade, contribui para inibir o apetite e para a melhora da compulsão alimentar.','O segundo é o <b>Morosil</b>, um extrato da laranja vermelha Moro, cultivada na Sicília, na Itália.','Ele auxilia na diminuição da gordura abdominal, contribui para a melhora da sensibilidade à insulina e ajuda a controlar os níveis de triglicerídeos e colesterol.','Tudo isso junto com uma alimentação equilibrada e atividade física.','Agora, a decisão depende da necessidade de cada pessoa.','Por isso, antes, converse com uma das nossas farmacêuticas e entenda o que pode ser melhor para você.'],
+ cta:['Quer saber qual faz sentido para você?','Chama a gente no WhatsApp.'],
+ extra:{tag:'Versão Black · antes do CTA',lines:['Na Black, de 26 a 30 de novembro, o Akkermat e o Morosil estão com <b>10% de desconto levando 1 pote</b>, e <b>20% levando 2 potes</b>.','Chama a gente no WhatsApp e escreve <b>"Vi a Black"</b>.']}}
+];
+
+const $=s=>document.querySelector(s);
+const tabs=$('#tabs'),view=$('#view');
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let doneMap=store.get('hn-done',{});
+const strip=h=>h.replace(/<[^>]+>/g,'');
+const words=v=>[...(v.call||[]),...(v.body||[]),...(v.cta||[]),...(v.qa?v.qa.map(x=>x[1]):[])].map(strip).join(' ').split(/\s+/).filter(Boolean).length;
+V.forEach((v,i)=>{const b=document.createElement('button');b.className='tab';b.role='tab';b.innerHTML=`<b>${v.n}</b><small>${v.s}</small>`;b.onclick=()=>show(i,true);tabs.appendChild(b)});
+function paintTabs(){[...tabs.children].forEach((b,k)=>{b.setAttribute('aria-selected',k===cur);b.classList.toggle('done',!!doneMap[V[k].id])});const d=$('#done');d.setAttribute('aria-pressed',!!doneMap[V[cur].id]);d.classList.toggle('on',!!doneMap[V[cur].id]);d.textContent=doneMap[V[cur].id]?'✓ Gravado':'Gravado?'}
+const blk=(cls,tag,lines)=>`<section class="blk ${cls}"><span class="tag">${tag}</span>${lines.map(l=>`<p class="line">${l}</p>`).join('')}</section>`;
+let cur=0;
+function show(i,push){
+  cur=i;const v=V[i];stop();
+  const sec=Math.round(words(v)/2.6);
+  let h=`<h1>${v.n} · ${v.t}</h1><p class="meta">${v.m}<span class="dur">fala de cerca de ${sec} s</span></p><p class="hint">Toque em Rolar para a página descer sozinha. Toque na tela para pausar.</p>`;
+  if(v.call)h+=blk('call','1 · Abertura',v.call);
+  if(v.body)h+=blk('','2 · Fala',v.body);
+  if(v.qa)h+=`<section class="blk"><span class="tag">Perguntas e respostas</span>${v.qa.map(([q,a])=>`<p class="q">${q}</p><p class="a">${a}</p>`).join('')}</section>`;
+  if(v.extra)h+=blk('alt','Gravar também: '+v.extra.tag,v.extra.lines);
+  h+=blk('cta',v.qa?'Fechamento':'3 · Fechamento',v.cta);
+  if(v.note)h+=`<section class="blk note"><span class="tag">Dica, não falar</span><br>${v.note}</section>`;
+  h+=`<div class="next"><button class="btn" ${i?'':'disabled style="opacity:.4"'} id="pv">← Anterior</button><button class="btn go" ${i<V.length-1?'':'disabled style="opacity:.4"'} id="nx">Próximo →</button></div>`;
+  view.innerHTML=h;window.scrollTo(0,0);
+  if(i)$('#pv').onclick=()=>show(i-1,true);
+  if(i<V.length-1)$('#nx').onclick=()=>show(i+1,true);
+  if(push)try{history.replaceState(null,'','#'+v.id)}catch(e){location.hash=v.id}
+  paintTabs();tabs.children[i].scrollIntoView({inline:'center',block:'nearest'});
+}
+let fs=store.get('hn-fs',36);
+function setFs(n){fs=Math.max(22,Math.min(72,n));document.documentElement.style.setProperty('--fs',fs+'px');store.set('hn-fs',fs)}
+setFs(fs);
+$('#minus').onclick=()=>setFs(fs-3);$('#plus').onclick=()=>setFs(fs+3);
+// tema
+let th=store.get('hn-th','');function setTh(t){th=t;if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme;store.set('hn-th',t)}
+setTh(th);$('#theme').onclick=()=>{const dark=document.documentElement.dataset.theme==='dark'||(!th&&matchMedia('(prefers-color-scheme: dark)').matches);setTh(dark?'light':'dark')};
+// foco
+$('#foc').onclick=()=>{const on=document.body.classList.toggle('focus');$('#foc').setAttribute('aria-pressed',on);$('#foc').classList.toggle('on',on)};
+// gravado
+$('#done').onclick=()=>{const id=V[cur].id;doneMap[id]=!doneMap[id];store.set('hn-done',doneMap);paintTabs()};
+// velocidade
+const SP=[['Lento',22],['Médio',40],['Rápido',65],['Muito rápido',95]];let si=store.get('hn-sp',1);
+function setSp(n){si=Math.max(0,Math.min(SP.length-1,n));$('#spdl').textContent=SP[si][0];store.set('hn-sp',si)}
+setSp(si);$('#slow').onclick=()=>setSp(si-1);$('#fast').onclick=()=>setSp(si+1);
+// rolagem com contagem 3-2-1 e linha-guia
+let raf=0,last=0,on=false,cd=0,wl=null;
+function tick(t){if(!on)return;const dt=Math.min(t-last,60);last=t;window.scrollBy(0,SP[si][1]*(fs/36)*dt/1000);
+  if(window.innerHeight+window.scrollY>=document.body.scrollHeight-2){stop();return}raf=requestAnimationFrame(tick)}
+async function lock(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+function begin(){on=true;document.body.classList.add('rolling');$('#play').textContent='❚❚ Pausar';last=performance.now();raf=requestAnimationFrame(tick)}
+function start(){let n=3;const c=$('#count');c.style.display='flex';c.textContent=n;lock();cd=setInterval(()=>{n--;if(n<=0){clearInterval(cd);cd=0;c.style.display='none';begin()}else c.textContent=n},800);$('#play').textContent='❚❚ Cancelar'}
+function stop(){on=false;cancelAnimationFrame(raf);if(cd){clearInterval(cd);cd=0;$('#count').style.display='none'}document.body.classList.remove('rolling');$('#play').textContent='▶ Rolar';try{wl&&wl.release();wl=null}catch(e){}}
+$('#play').onclick=()=>(on||cd)?stop():start();
+view.addEventListener('click',()=>{if(on)stop()});
+view.addEventListener('touchstart',()=>{if(on)stop()},{passive:true});
+const fromHash=()=>{const k=V.findIndex(v=>v.id===location.hash.slice(1));show(k<0?0:k,false)};
+window.addEventListener('hashchange',fromHash);fromHash();
+</script>
+</body>
+</html>
