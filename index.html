@@ -42,6 +42,7 @@ h1{font:700 clamp(22px,4vw,30px)/1.2 var(--display);margin:2px 0 4px;text-wrap:b
 .blk.alt{border:2px dashed var(--green)}
 .blk.note{background:var(--note);font-size:17px;line-height:1.4}
 .blk.note .tag{background:rgba(0,0,0,.08);color:var(--mute)}
+.line,.a,.q{overflow-wrap:anywhere}
 .line{font:500 var(--fs)/1.42 var(--body);margin:0 0 .6em;text-wrap:pretty}
 .line:last-child{margin-bottom:0}
 .line b{font-weight:700;color:var(--green-d)}
@@ -67,7 +68,7 @@ body.focus .bar{opacity:.35} body.focus .bar:hover,body.focus .bar:focus-within{
 body.focus .blk{border:none;background:transparent;padding:6px 0;margin:0 0 20px}
 body.focus .blk.call,body.focus .blk.cta{background:transparent}
 body.focus .blk.cta .line{color:var(--cta-ink)} body.focus .blk.call .line{color:var(--green-d)}
-@media (max-width:560px){:root{--fs:29px}.btn{padding:0 10px;min-width:42px;min-height:44px;font-size:15px}.bar{gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}main{padding-bottom:140px}.count{font-size:110px}}
+@media (max-width:560px){:root{--fs:29px}.btn{padding:0 10px;min-width:42px;min-height:44px;font-size:15px}.bar{gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}.count{font-size:110px}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 </head>
@@ -174,6 +175,7 @@ function stop(){on=false;cancelAnimationFrame(raf);if(cd){clearInterval(cd);cd=0
 $('#play').onclick=()=>(on||cd)?stop():start();
 view.addEventListener('click',()=>{if(on)stop()});
 view.addEventListener('touchstart',()=>{if(on)stop()},{passive:true});
+const bar=document.querySelector('.bar'),pad=()=>{view.style.paddingBottom=(bar.offsetHeight+28)+'px'};pad();addEventListener('resize',pad);if(window.ResizeObserver)new ResizeObserver(pad).observe(bar);
 const fromHash=()=>{const k=V.findIndex(v=>v.id===location.hash.slice(1));show(k<0?0:k,false)};
 window.addEventListener('hashchange',fromHash);fromHash();
 </script>
