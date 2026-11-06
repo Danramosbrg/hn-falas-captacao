@@ -42,7 +42,7 @@ h1{font:700 clamp(22px,4vw,30px)/1.2 var(--display);margin:2px 0 4px;text-wrap:b
 .blk.alt{border:2px dashed var(--green)}
 .blk.note{background:var(--note);font-size:17px;line-height:1.4}
 .blk.note .tag{background:rgba(0,0,0,.08);color:var(--mute)}
-.line,.a,.q{overflow-wrap:anywhere}
+.line,.a,.q{word-wrap:break-word;overflow-wrap:break-word}
 .line{font:500 var(--fs)/1.42 var(--body);margin:0 0 .6em;text-wrap:pretty}
 .line:last-child{margin-bottom:0}
 .line b{font-weight:700;color:var(--green-d)}
@@ -54,7 +54,7 @@ h1{font:700 clamp(22px,4vw,30px)/1.2 var(--display);margin:2px 0 4px;text-wrap:b
 .next{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
 .guide{position:fixed;left:0;right:0;top:38%;height:calc(var(--fs)*1.5);background:var(--guide);border-top:2px solid var(--green);border-bottom:2px solid var(--green);pointer-events:none;display:none;z-index:4}
 body.rolling .guide{display:block}
-.count{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;font:700 160px var(--display);color:var(--green);background:color-mix(in srgb,var(--bg) 80%,transparent)}
+.count{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9;display:none;align-items:center;justify-content:center;font:700 160px var(--display);color:var(--green);background:rgba(128,128,128,.35)}
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
 .btn{min-height:50px;min-width:50px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:700 16px var(--display);cursor:pointer}
 .btn.go{background:var(--green);border-color:var(--green);color:#fff;min-width:130px;font-size:18px}
@@ -76,6 +76,7 @@ body.focus .blk.cta .line{color:var(--cta-ink)} body.focus .blk.call .line{color
 <header class="top"><div class="tabs" role="tablist" id="tabs"></div></header>
 <main id="view"></main>
 <div class="guide" aria-hidden="true"></div>
+<div id="wake" style="display:none;position:fixed;left:12px;right:12px;top:70px;z-index:8;background:var(--note);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:15px">Se a tela do tablet apagar durante a leitura, aumente o tempo de tela nas configurações do aparelho.</div>
 <div class="count" id="count" aria-live="assertive"></div>
 <div class="bar">
   <button class="btn" id="minus" aria-label="Diminuir letra">A−</button>
@@ -166,12 +167,15 @@ function setSp(n){si=Math.max(0,Math.min(SP.length-1,n));$('#spdl').textContent=
 setSp(si);$('#slow').onclick=()=>setSp(si-1);$('#fast').onclick=()=>setSp(si+1);
 // rolagem com contagem 3-2-1 e linha-guia
 let raf=0,last=0,on=false,cd=0,wl=null;
-function tick(t){if(!on)return;const dt=Math.min(t-last,60);last=t;window.scrollBy(0,SP[si][1]*(fs/36)*dt/1000);
-  if(window.innerHeight+window.scrollY>=document.body.scrollHeight-2){stop();return}raf=requestAnimationFrame(tick)}
-async function lock(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
-function begin(){on=true;document.body.classList.add('rolling');$('#play').textContent='❚❚ Pausar';last=performance.now();raf=requestAnimationFrame(tick)}
+let pos=0;
+function tick(t){if(!on)return;const dt=Math.min(t-last,60);last=t;pos+=SP[si][1]*(fs/36)*dt/1000;
+  const target=Math.round(pos);if(target!==Math.round(window.scrollY))window.scrollTo(0,target);
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  if(pos>=max-1||window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2){stop();return}raf=requestAnimationFrame(tick)}
+async function lock(){try{wl=await navigator.wakeLock.request('screen');$('#wake').style.display='none'}catch(e){$('#wake').style.display='block'}}
+function begin(){pos=window.scrollY;on=true;document.body.classList.add('rolling');$('#play').textContent='❚❚ Pausar';last=performance.now();raf=requestAnimationFrame(tick)}
 function start(){let n=3;const c=$('#count');c.style.display='flex';c.textContent=n;lock();cd=setInterval(()=>{n--;if(n<=0){clearInterval(cd);cd=0;c.style.display='none';begin()}else c.textContent=n},800);$('#play').textContent='❚❚ Cancelar'}
-function stop(){on=false;cancelAnimationFrame(raf);if(cd){clearInterval(cd);cd=0;$('#count').style.display='none'}document.body.classList.remove('rolling');$('#play').textContent='▶ Rolar';try{wl&&wl.release();wl=null}catch(e){}}
+function stop(){on=false;try{$('#wake').style.display='none'}catch(e){}cancelAnimationFrame(raf);if(cd){clearInterval(cd);cd=0;$('#count').style.display='none'}document.body.classList.remove('rolling');$('#play').textContent='▶ Rolar';try{wl&&wl.release();wl=null}catch(e){}}
 $('#play').onclick=()=>(on||cd)?stop():start();
 view.addEventListener('click',()=>{if(on)stop()});
 view.addEventListener('touchstart',()=>{if(on)stop()},{passive:true});
